@@ -4,6 +4,8 @@ import com.dfire.common.exception.HeraException;
 import com.dfire.common.util.Pair;
 import com.dfire.config.HeraGlobalEnv;
 
+import static com.dfire.config.HeraGlobalEnv.isWindows;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +26,9 @@ public class CommandUtils {
      * @return 民营
      */
     public static String changeFileAuthority(String filePath) {
+        if (isWindows()) {
+            return null;
+        }
         return CHANGE_AUTHORITY + filePath;
     }
 

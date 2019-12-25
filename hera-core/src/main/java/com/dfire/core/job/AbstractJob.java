@@ -68,10 +68,13 @@ public abstract class AbstractJob implements Job {
         }
         String user = getUser();
         if (StringUtils.isBlank(user)) {
-            return null;
+            return "";
         }
         if (HeraGlobalEnv.isMacOS()) {
             return "sudo -u " + user;
+        }
+        if (HeraGlobalEnv.isWindows()) {
+            return "";
         }
         return "sudo -s -E -u " + user;
     }
@@ -191,6 +194,9 @@ public abstract class AbstractJob implements Job {
 
     protected boolean checkDosToUnix(String filePath) {
         if (HeraGlobalEnv.isEmrJob()) {
+            return false;
+        }
+        if (HeraGlobalEnv.isWindows()) {
             return false;
         }
         String[] excludeFile = HeraGlobalEnv.excludeFile.split(Constants.SEMICOLON);

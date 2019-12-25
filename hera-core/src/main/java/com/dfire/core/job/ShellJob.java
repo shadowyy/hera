@@ -4,16 +4,19 @@ import com.alibaba.fastjson.JSONObject;
 import com.dfire.common.constants.RunningJobKeyConstant;
 import com.dfire.common.enums.JobRunTypeEnum;
 import com.dfire.common.exception.HeraException;
+import com.dfire.config.HeraGlobalEnv;
 import com.dfire.core.util.CommandUtils;
 import com.dfire.logs.ErrorLog;
 import com.dfire.logs.HeraLog;
 import com.dfire.logs.TaskLog;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,9 +57,9 @@ public class ShellJob extends ProcessJob {
                     HeraLog.error("创建文件失败:" + f.getAbsolutePath());
                 }
             }
-            outputStreamWriter = new OutputStreamWriter(new FileOutputStream(f), Charset.forName("utf-8"));
+            outputStreamWriter = new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8);
             outputStreamWriter.write(dosToUnix(script));
-            getProperties().setProperty(RunningJobKeyConstant.RUN_SHELL_PATH, f.getAbsolutePath());
+            getProperties().setProperty(RunningJobKeyConstant.RUN_SHELL_PATH, getAbsPath(f.getAbsolutePath()));
         } catch (IOException e) {
             throw new HeraException("创建文件失败，请检查是否有权限", e);
         } finally {
@@ -70,8 +73,6 @@ public class ShellJob extends ProcessJob {
         }
         String shellFilePath = getProperty(RunningJobKeyConstant.RUN_SHELL_PATH, "");
         List<String> list = new ArrayList<>();
-        //修改权限
-        String shellPrefix = getJobPrefix();
         //过滤不需要转化的后缀名
         boolean isDocToUnix = checkDosToUnix(shellFilePath);
         if (isDocToUnix) {
@@ -106,7 +107,7 @@ public class ShellJob extends ProcessJob {
             }
         }
         list.add(CommandUtils.changeFileAuthority(jobContext.getWorkDir()));
-        list.add(CommandUtils.getRunShCommand(shellPrefix, tmpFilePath));
+        list.add(CommandUtils.getRunShCommand(getJobPrefix(), tmpFilePath));
 
         TaskLog.info("5.1 命令：{}", JSONObject.toJSONString(list));
         return list;
@@ -115,6 +116,20 @@ public class ShellJob extends ProcessJob {
     @Override
     public int run() throws Exception {
         return super.run();
+    }
+
+    private static String getAbsPath(String absolutePath) {
+        if (HeraGlobalEnv.isWindows()) {
+            ////WSL
+            //String s1 = StringUtils.replaceChars(absolutePath, '\\', '/');
+            //String s2 = StringUtils.replaceChars(s1, ":", "");
+            //String disk = StringUtils.substring(s2, 0, 1);
+            //String path = StringUtils.substring(s2, 1);
+            //return "/mnt/" + StringUtils.lowerCase(disk) + path;
+            ////normal
+            return StringUtils.replaceChars(absolutePath, '\\', '/');
+        }
+        return absolutePath;
     }
 
 }

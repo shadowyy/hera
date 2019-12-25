@@ -451,12 +451,13 @@ public class HeraGlobalEnv {
 
     static {
         String os = System.getProperty("os.name");
-        if (os != null) {
-            if (os.toLowerCase().startsWith("win")) {
+        if (StringUtils.isNotBlank(os)) {
+            String lowerCase = os.toLowerCase();
+            if (lowerCase.startsWith("win")) {
                 systemEnum = OperatorSystemEnum.WIN;
-            } else if (os.toLowerCase().startsWith("mac")) {
+            } else if (lowerCase.startsWith("mac")) {
                 systemEnum = OperatorSystemEnum.MAC;
-            } else {
+            } else if (lowerCase.startsWith("linux")) {
                 systemEnum = OperatorSystemEnum.LINUX;
             }
         }
@@ -476,5 +477,8 @@ public class HeraGlobalEnv {
         return OperatorSystemEnum.isMac(systemEnum);
     }
 
+    public static boolean isWindows() {
+        return OperatorSystemEnum.isWindows(systemEnum);
+    }
 
 }

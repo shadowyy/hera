@@ -5,10 +5,12 @@ import com.dfire.common.constants.Constants;
 import com.dfire.common.exception.HeraCaughtExceptionHandler;
 import com.dfire.common.exception.HeraException;
 import com.dfire.common.util.HierarchyProperties;
+import com.dfire.common.util.StringUtil;
 import com.dfire.config.HeraGlobalEnv;
 import com.dfire.logs.ErrorLog;
 import com.dfire.logs.HeraLog;
 import com.dfire.logs.TaskLog;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -52,7 +54,9 @@ public abstract class ProcessJob extends AbstractJob {
         List<String> commands = getCommandList();
 
         for (String command : commands) {
-
+            if (StringUtils.isBlank(command)) {
+                continue;
+            }
             String[] splitCommand = partitionCommandLine(command);
             ProcessBuilder builder = new ProcessBuilder(splitCommand);
             builder.directory(new File(jobContext.getWorkDir()));
